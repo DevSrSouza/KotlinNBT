@@ -1,3 +1,2 @@
+include("api")
 rootProject.name = 'KotlinNBT'
-
-include(":api")

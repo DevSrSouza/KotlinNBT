@@ -4,6 +4,7 @@ import br.com.devsrsouza.kotlinnbt.api.tags.*
 import kotlin.reflect.KClass
 
 enum class TagType(val id: Int, val tagName: String, val clazz: KClass<out ITag>) {
+    END(0, "End", EndTag::class),
     BYTE(1, "Byte", ByteTag::class),
     SHORT(2, "Short", ShortTag::class),
     INT(3, "Int", IntTag::class),
