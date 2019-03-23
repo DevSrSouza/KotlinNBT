@@ -2,7 +2,6 @@ package br.com.devsrsouza.kotlinnbt.api
 
 interface ITag {
     val type: TagType
-    val name: String?
     fun data(): String
-    override fun toString(): String
+    fun toString(name: String?): String = "TAG_${type.tagName}(${name?.let { "'$it'" } ?: "None"}): ${data()}"
 }
