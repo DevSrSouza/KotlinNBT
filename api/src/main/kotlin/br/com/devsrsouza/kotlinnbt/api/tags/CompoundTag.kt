@@ -5,11 +5,9 @@ import br.com.devsrsouza.kotlinnbt.api.TagType
 
 inline fun nbtCompound(block: CompoundTag.() -> Unit) = CompoundTag().apply(block)
 
-class CompoundTag : ITag {
+open class CompoundTag : ITag, MutableMap<String, ITag> by mutableMapOf() {
     override val type = TagType.COMPOUND
-    override fun data(): String = tags.entries.joinToString("\n", "entries: ${tags.size} \n{\n", "\n}") { it.value.toString(it.key).prependIndent("  ") }
-
-    val tags = mutableMapOf<String, ITag>()
+    override fun data(): String = entries.joinToString("\n", "entries: $size \n{\n", "\n}") { it.value.toString(it.key).prependIndent("  ") }
 
     val byte = TagSetter<Byte> { name: String, value: Byte -> ByteTag(value) }
     val short = TagSetter<Short> { name: String, value: Short -> ShortTag(value) }
@@ -23,16 +21,16 @@ class CompoundTag : ITag {
     val string = TagSetter<String> { name: String, value: String -> StringTag(value) }
 
     inline fun <reified T : ITag> list(name: String, block: ListTag<T>.() -> Unit) {
-        tags.put(name, ListTag(T::class).apply(block))
+        put(name, ListTag(T::class).apply(block))
     }
 
     inline fun compound(name: String, block: CompoundTag.() -> Unit) {
-        tags.put(name, CompoundTag().apply(block))
+        put(name, CompoundTag().apply(block))
     }
 
     inner class TagSetter<T>(private val tagFactory: (name: String, value: T) -> ITag) {
         operator fun set(name: String, value: T) {
-            tags.put(name, tagFactory.invoke(name, value))
+            put(name, tagFactory.invoke(name, value))
         }
     }
 
