@@ -5,5 +5,5 @@ import br.com.devsrsouza.kotlinnbt.api.TagType
 
 class LongTag(val value: Long) : ITag {
     override val type = TagType.LONG
-    override fun data() = type.toString()
+    override fun data() = value.toString()
 }
