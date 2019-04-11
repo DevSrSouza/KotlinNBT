@@ -2,12 +2,16 @@ package br.com.devsrsouza.kotlinnbt.api.tags
 
 import br.com.devsrsouza.kotlinnbt.api.ITag
 import br.com.devsrsouza.kotlinnbt.api.TagType
+import br.com.devsrsouza.kotlinnbt.api.io.NbtIO
+import br.com.devsrsouza.kotlinnbt.api.io.readTag
+import kotlinx.io.core.*
 
 inline fun nbtCompound(block: CompoundTag.() -> Unit) = CompoundTag().apply(block)
 
 open class CompoundTag : ITag, MutableMap<String, ITag> by mutableMapOf() {
     override val type = TagType.COMPOUND
-    override fun data(): String = entries.joinToString("\n", "entries: $size \n{\n", "\n}") { it.value.toString(it.key).prependIndent("  ") }
+    override fun data(): String =
+        entries.joinToString("\n", "entries: $size \n{\n", "\n}") { it.value.toString(it.key).prependIndent("  ") }
 
     val byte = TagSetter<Byte> { name: String, value: Byte -> ByteTag(value) }
     val short = TagSetter<Short> { name: String, value: Short -> ShortTag(value) }
@@ -31,6 +35,41 @@ open class CompoundTag : ITag, MutableMap<String, ITag> by mutableMapOf() {
     inner class TagSetter<T>(private val tagFactory: (name: String, value: T) -> ITag) {
         operator fun set(name: String, value: T) {
             put(name, tagFactory.invoke(name, value))
+        }
+    }
+
+    companion object IO : NbtIO<CompoundTag>() {
+        override fun write(tag: CompoundTag, builder: BytePacketBuilder) {
+            writeType(tag, builder)
+
+            for ((name, tag) in tag.entries) {
+                val bytes = name.toByteArray()
+                builder.writeShort(bytes.size.toShort())
+                builder.writeFully(bytes)
+
+                tag.type.io.write(tag, builder)
+            }
+
+            builder.writeByte(TagType.END.id)
+        }
+
+        override fun read(packet: ByteReadPacket): CompoundTag {
+            val compound = CompoundTag()
+
+            do {
+                val nameLength = packet.readShort()
+                val nameBytes = packet.readBytes(nameLength.toInt())
+
+                val name = String(nameBytes)
+
+                val tag = packet.readTag()
+
+                if (tag !is EndTag)
+                    compound[name] = tag
+
+            } while (tag !is EndTag)
+
+            return compound
         }
     }
 
