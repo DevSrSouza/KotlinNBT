@@ -13,16 +13,16 @@ open class CompoundTag : ITag, MutableMap<String, ITag> by mutableMapOf() {
     override fun data(): String =
         entries.joinToString("\n", "entries: $size \n{\n", "\n}") { it.value.toString(it.key).prependIndent("  ") }
 
-    val byte = TagSetter<Byte> { name: String, value: Byte -> ByteTag(value) }
-    val short = TagSetter<Short> { name: String, value: Short -> ShortTag(value) }
-    val int = TagSetter<Int> { name: String, value: Int -> IntTag(value) }
-    val long = TagSetter<Long> { name: String, value: Long -> LongTag(value) }
-    val float = TagSetter<Float> { name: String, value: Float -> FloatTag(value) }
-    val double = TagSetter<Double> { name: String, value: Double -> DoubleTag(value) }
-    val byteArray = TagSetter<ByteArray> { name: String, value: ByteArray -> ByteArrayTag(value) }
-    val intArray = TagSetter<IntArray> { name: String, value: IntArray -> IntArrayTag(value) }
-    val longArray = TagSetter<LongArray> { name: String, value: LongArray -> LongArrayTag(value) }
-    val string = TagSetter<String> { name: String, value: String -> StringTag(value) }
+    val byte = TagProperty<Byte> { name: String, value: Byte -> ByteTag(value) }
+    val short = TagProperty<Short> { name: String, value: Short -> ShortTag(value) }
+    val int = TagProperty<Int> { name: String, value: Int -> IntTag(value) }
+    val long = TagProperty<Long> { name: String, value: Long -> LongTag(value) }
+    val float = TagProperty<Float> { name: String, value: Float -> FloatTag(value) }
+    val double = TagProperty<Double> { name: String, value: Double -> DoubleTag(value) }
+    val byteArray = TagProperty<ByteArray> { name: String, value: ByteArray -> ByteArrayTag(value) }
+    val intArray = TagProperty<IntArray> { name: String, value: IntArray -> IntArrayTag(value) }
+    val longArray = TagProperty<LongArray> { name: String, value: LongArray -> LongArrayTag(value) }
+    val string = TagProperty<String> { name: String, value: String -> StringTag(value) }
 
     inline fun <reified T : ITag> list(name: String, block: ListTag<T>.() -> Unit) {
         put(name, ListTag(T::class).apply(block))
@@ -32,7 +32,10 @@ open class CompoundTag : ITag, MutableMap<String, ITag> by mutableMapOf() {
         put(name, CompoundTag().apply(block))
     }
 
-    inner class TagSetter<T>(private val tagFactory: (name: String, value: T) -> ITag) {
+    inner class TagProperty<T>(private val tagFactory: (name: String, value: T) -> ITag) {
+        operator fun get(name: String): T {
+            return this@CompoundTag[name] as T
+        }
         operator fun set(name: String, value: T) {
             put(name, tagFactory.invoke(name, value))
         }
