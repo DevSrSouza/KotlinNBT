@@ -1,2 +1,1 @@
-include("api")
-rootProject.name = 'KotlinNBT'
+rootProject.name = "KotlinNBT"
