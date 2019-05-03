@@ -4,6 +4,8 @@ import br.com.devsrsouza.kotlinnbt.api.ITag
 import br.com.devsrsouza.kotlinnbt.api.TagType
 import kotlinx.io.core.BytePacketBuilder
 import kotlinx.io.core.ByteReadPacket
+import kotlinx.io.core.buildPacket
+import kotlinx.io.core.readBytes
 
 fun ITag.write(builder: BytePacketBuilder) {
     builder.writeTag(this)
@@ -20,3 +22,7 @@ fun ByteReadPacket.readTag(): ITag {
         return type.io.read(this)
     } else throw RuntimeException("readded tag type '$type' not supported")
 }
+
+fun byteArrayToTag(bytes: ByteArray) = ByteReadPacket(bytes).readTag()
+
+fun ITag.toByteArray() = buildPacket { writeTag(this@toByteArray) }.readBytes()
