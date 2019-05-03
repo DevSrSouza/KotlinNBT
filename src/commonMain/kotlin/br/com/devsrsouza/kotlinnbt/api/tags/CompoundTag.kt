@@ -33,8 +33,8 @@ open class CompoundTag : ITag, MutableMap<String, ITag> by mutableMapOf() {
     }
 
     inner class TagProperty<T>(private val tagFactory: (name: String, value: T) -> ITag) {
-        operator fun get(name: String): T {
-            return this@CompoundTag[name] as T
+        operator fun get(name: String): T? {
+            return this@CompoundTag[name] as T?
         }
         operator fun set(name: String, value: T) {
             put(name, tagFactory.invoke(name, value))
